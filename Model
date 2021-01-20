@@ -1,0 +1,102 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+
+ class M_kedatangan extends CI_Model
+ {
+
+	// function tampil_data1()
+	// {
+	// 	$this->db->select('berobat. id_berobat, id_pasien as pasien, id_dokter as dokter, tgl_berobat, keluhan_pasien, hasil_diagnosa, penatalaksanaan');
+	// 	$this->db->from('berobat');
+	// 	// $this->db->join('pasien','id_pasien = pasien.id_pasien');
+	// 	// $this->db->join('dokter', 'id_dokter = dokter.id_dokter');
+	// 	$this->db->Where('tgl_berobat', 'date(-m-d)');
+	// 	$this->db->order_by('id_berobat', 'desc' );
+	// 	$query = $this->db->get();
+	// 	return $query;
+
+	// }
+
+ 	function tampil_today()
+ 	{
+ 		$tgl_berobat = date('y-m-d');	
+ 		$query = $this->db->query("SELECT berobat.*,
+ 			pasien.no_rm, 
+ 			pasien.nama_pasien,
+ 			pasien.tgl_lahir,
+ 			pasien.jenis_kelamin,
+ 			dokter.nama_dokter
+ 			FROM berobat
+ 			INNER JOIN pasien ON berobat.no_rm=pasien.no_rm
+ 			INNER JOIN dokter ON berobat.id_dokter=dokter.id_dokter
+ 			WHERE berobat.tgl_berobat='$tgl_berobat'");
+
+ 		return $query;
+ 	}
+
+ 	function tampil_data()
+ 	{
+ 		$query = $this->db->query("SELECT berobat.*,
+ 			pasien.no_rm, 
+ 			pasien.nama_pasien,
+ 			pasien.tgl_lahir,
+ 			pasien.jenis_kelamin,
+ 			dokter.nama_dokter
+ 			FROM berobat
+ 			INNER JOIN pasien ON berobat.no_rm=pasien.no_rm
+ 			INNER JOIN dokter ON berobat.id_dokter=dokter.id_dokter");
+
+ 		return $query;
+ 	}
+  
+  function tampil_rm($id)
+ 	{
+ 		$query = $this->db->query("SELECT berobat.*, 
+ 			pasien.no_rm,
+ 			pasien.nama_pasien,
+ 			pasien.tgl_lahir,
+ 			pasien.jenis_kelamin,
+ 			dokter.nama_dokter
+ 			FROM berobat
+ 			INNER JOIN pasien ON berobat.no_rm=pasien.no_rm
+ 			INNER JOIN dokter ON berobat.id_dokter=dokter.id_dokter
+ 			WHERE berobat.no_transaksi='$id'");
+
+ 		return $query;
+ 	}
+
+
+ 	function tampil_riwayat($pasien)
+ 	{
+ 		$query = $this->db->select('b.*,b.no_transaksi, b.no_rm, b.id_dokter, b.tgl_berobat, b.keluhan_pasien, b.hasil_diagnosa, b.penatalaksanaan, b.jenis_pasien')
+ 		->from('berobat b')
+ 		->join('pasien p', 'p.no_rm = b.no_rm', 'left')
+ 		->where(['b.no_rm' => $pasien])
+ 		->order_by('b.tgl_berobat', 'DESC')
+ 		->limit(5)
+ 		->get()->result_array();
+
+ 		return $query;
+ 	}
+  
+  function update_rm($no_transaksi, $kesadaran, $tb, $bb, $sistole, $diastole, $spo2, $rr, $hr, $keluhan, $diagnosa, $penatalaksanaan)
+ 	{
+
+ 		$data = [
+ 			"kesadaran" => $kesadaran,
+ 			"tb" => $tb,
+ 			"bb" => $bb,
+ 			"sistole" => $sistole,
+ 			"diastole" => $diastole,
+ 			"spo2" => $spo2,
+ 			"rr" => $rr,
+ 			"hr" => $hr,
+ 			"keluhan_pasien" => $keluhan,
+ 			"hasil_diagnosa" => $diagnosa,
+ 			"penatalaksanaan" => $penatalaksanaan
+ 		];
+
+ 		$this->db->where('no_transaksi', $no_transaksi);
+ 		return $this->db->update('berobat', $data);
+
+ 	}
+}
