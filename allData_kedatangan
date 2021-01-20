@@ -1,0 +1,48 @@
+<script>
+	$(document).ready(function() {
+		$('#table1').DataTable()
+	});
+</script>
+
+<table class="table table-bordered table-striped display responsive nowrap" style="width:100%" id="table1">
+	<thead>
+		<tr>
+			<th>No.</th>
+			<th>Tanggal</th>
+			<th>No. Transaksi</th>
+			<th>No. RM</th>
+			<th>Nama Pasien</th>
+			<th>Umur</th>
+			<th>status</th>
+			<th>Dokter</th>
+			<th>Rekam Medis</th>
+			<th>Aksi</th>
+		</tr>
+	</thead>
+	<tbody>
+
+		<?php $no=1; foreach ($kedatangan as $r) { ?>
+			<tr>
+				<td class="text-center"><?= $no; ?></td>
+				<td><?= indo_date($r['tgl_berobat'])?></td>
+				<td><?= $r['no_transaksi']?></td>
+				<td><?= $r['no_rm']?></td>
+				<td><?= $r['nama_pasien']?></td>
+				<td><?= $r['tgl_berobat']-$r['tgl_lahir']?> Thn</td>
+				<td><?= $r['jenis_pasien']?></td>
+				<td><?= $r['nama_dokter']?></td>
+				<td>
+					<a href="<?= base_url('kedatangan/').'kedatangan/rekam/'.$r['no_transaksi'];?>" class="btn btn-warning btn-sm">rekam</a>
+				</td>
+				<td>
+					<a href="<?= base_url('kunjungan/').'kunjungan/edit/'.$r['no_transaksi'];?>" class="btn btn-warning btn-sm">Edit</a>
+					<button type="button" class="btn btn-danger btn-sm"
+					onclick="return hapustransaksi('<?php echo
+					$r['no_transaksi'] ?>');" title="Hapus Data">
+					<i class="fa fa-trash"></i>
+				</button>
+			</td>
+		</tr>
+		<?php $no++; } ?>
+	</tbody>
+</table>
