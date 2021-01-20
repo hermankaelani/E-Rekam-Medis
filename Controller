@@ -1,0 +1,121 @@
+<?php
+ini_set("memory_limit","512M");
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Kedatangan extends CI_Controller {
+
+	private $cek_akses_user;
+	function __construct() {
+		parent::__construct();
+
+		cek_aktif_login();
+		$this->cek_akses_user = cek_akses_user();
+
+		$this->load->model('konfigurasi/Akses_m', 'akses');
+
+		$this->load->model('m_kedatangan');
+		$this->load->model('pasien/m_pasien','m_pasien');
+		$this->load->model('dokter/m_dokter','m_dokter');
+		$this->load->model('obat/m_obat','m_obat');
+	}
+  
+function index()
+	{
+		if($this->cek_akses_user['akses'] != 1){
+			redirect(base_url('login/blocked'));
+		}
+		$data['title'] = "Semua kedatangan";
+		$data['users'] = $this->db->get_where('users', ['nik' => $this->session->userdata('nik')])->row_array();
+
+		$data['main_menu'] = main_menu();
+		$data['sub_menu'] = sub_menu();
+		$data['list_level_user'] = $this->akses->list_level_user();
+
+		// $data['kedatangan'] = $this->m_kedatangan->tampil_data()->result_array();
+
+		$this->load->view('templates/header', $data);
+        $this->load->view('templates/sidebar', $data);
+        $this->load->view('templates/topbar', $data);
+		$this->load->view('kedatangan/v_data', $data);
+		$this->load->view('templates/footer');
+	}
+
+	function allData_kedatangan()
+	{
+		$data['kedatangan']=$this->m_kedatangan->tampil_data()->result_array();
+		$this->load->view('kedatangan/allData_kedatangan',$data);
+	}
+
+//fungsi untuk Rekam Medis
+	function rekam($id)
+	{
+		if($this->cek_akses_user['tambah'] != 1){
+			redirect(base_url('login/blocked'));
+		}
+		// $id = $this->input->post('kode_transaksi', true);
+
+		$data['title'] = "Rekam Medis";
+		$data['users'] = $this->db->get_where('users', ['nik' => $this->session->userdata('nik')])->row_array();
+		
+		$data['main_menu'] = main_menu();
+        $data['sub_menu'] = sub_menu();
+        $data['list_level_user'] = $this->akses->list_level_user();
+        
+		//menampilkan detail Rekam Medis
+		$data['d'] = $this->m_kedatangan->tampil_rm($id)->row_array();
+
+		//mendapatkan data pasien //menampilkan  riwayat kedatangan
+		$q = $this->db->query("SELECT no_rm FROM berobat WHERE no_transaksi='$id'")->row_array();
+		$id_pasien = $q['no_rm'];
+		
+		//mendapatkan data riwayat kedatangan
+		// $data['riwayat'] = $this->m_kedatangan->tampil_riwayat($id_pasien)->result_array();
+		$data['riwayat'] = $this->m_kedatangan->tampil_riwayat($id_pasien);
+
+		//menampilkan data obat di combo
+		$data['obat'] = $this->m_obat->tampil_data()->result_array();
+		
+		//menampilkan resep obat
+		$data['resep'] = $this->m_kedatangan->tampil_resep($id)->result_array();
+
+		//menampilkan data icd di combo
+		$data['icdx'] = $this->m_kedatangan->tampil_icdx()->result_array();
+
+		//menampilkan icd
+		$data['icd'] = $this->m_kedatangan->tampil_icd($id)->result_array();
+
+		//menampilkan data icd-9 di combo
+		$data['icd_9'] = $this->m_kedatangan->tampil_icd_9()->result_array();
+
+		//menampilkan icd-9
+		$data['icd9'] = $this->m_kedatangan->tampil_icd9($id)->result_array();
+
+
+		$this->load->view('templates/header', $data);
+        $this->load->view('templates/sidebar', $data);
+        $this->load->view('templates/topbar', $data);
+		$this->load->view('kedatangan/v_rekam_medis', $data);
+		$this->load->view('templates/footer');
+
+		//page js
+		// $this->load->view('details_js');
+	}
+
+	function data_riwayat()
+	{
+		// $id = $this->input->post('no_transaksi', true);
+		// $id = 'HK2012260001';
+		$id = $this->input->post('id');
+		$data['d'] = $this->m_kedatangan->tampil_rm($id)->row_array();
+
+		//mendapatkan data pasien //menampilkan  riwayat kedatangan
+		$q = $this->db->query("SELECT no_rm FROM berobat WHERE no_transaksi='$id'")->row_array();
+		$id_pasien = $q['no_rm'];
+		
+		//mendapatkan data riwayat kedatangan
+		$data['riwayat'] = $this->m_kedatangan->tampil_riwayat($id_pasien);
+
+		var_dump($id);
+		$this->load->view('kedatangan/data_riwayat',$data);
+	}
+}
