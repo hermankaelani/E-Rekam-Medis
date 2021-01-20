@@ -1,0 +1,231 @@
+<script>
+	$(document).ready(function (e) {
+		$('.formrm').submit(function (e) {
+			$.ajax({
+				url : $(this).attr('action'),
+				data : $(this).serialize(),
+				type : 'post',
+				dataType : 'json',
+				cache : false,
+				beforeSend : function() {
+					$('.tombolsimpan').attr('disabled', 'disabled');
+					$('.tombolsimpan').html('<i class="fa fa-spin fa-spinner"></i> Sedang Proses');
+				},
+				complete: function() {
+					$('.tombolsimpan').removeAttr('disabled');
+					$('.tombolsimpan').html('Update');
+					$('#tablepaul').hide();
+					// $('#tableshow').show();
+				},
+				
+				error: function (e) {
+					swal('Error', e,'error');
+				},	
+				success: function (data) {
+					$.ajax({
+							type: 'POST',
+							url: "<?= base_url(); ?>/kedatangan/kedatangan/data_riwayat",
+							cache: false,
+							success: function(data) {
+								$("#tableshow").html(data);
+							}
+						});
+					if (data.validasi) {
+						$('.pesan').fadeIn();
+						$('.pesan').html(data.validasi);
+					}
+					if (data.sukses){
+						swal({
+							title: "Rekam Data",
+							text: data.sukses,
+							type: "success",
+							showCancelButton: false,
+							closeOnConfirm: false,
+							showLoaderOnConfirm: false,
+						});			
+					}
+				}
+				
+			})
+			return false;
+		})
+	})
+</script>
+
+<div class="content-wrapper">
+	<section class="content-header">
+		<h1><?= $title; ?>
+		<div class="pull-right">
+			<a href="<?= base_url('kunjungan/kunjungan/today')?>" class="btn btn-warning btn-flat">
+				<i class="fa fa-undo"></i> Back
+				<a/>
+			</div>
+		</h1>
+    
+  <div class="box box-info box-solid with-border">
+							<div class="box-header">
+								<h3 class="box-title">
+									<i class="fa fa-heartbeat"></i> 
+									Riwayat Rekam Medis
+								</h3>
+								<div class="box-tools pull-right">
+									<a target="_blank" href="https://coba.luruilmu.com/rmpuskesmas/rekam_medis/cetak_rm/550" class="btn btn-sm btn-danger"><i class="fa fa-print"></i> Cetak RM</a>
+									<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+								</div>
+							</div>
+							<div class="box-body">
+								<div class="table-responsive">
+									<!-- <div id="tampilRiwayat"> -->
+										<!-- Data tampil disini -->
+									<!-- </div> -->
+									<table class="table table-bordered table-condensed table-striped datatable" id="tablepaul">
+										<thead>
+											<tr>
+												<th>No.</th>
+												<th>Tgl. Berobat</th>
+												<th>Keluhan</th>
+												<th>Diagnosa</th>
+												<th>Penatalaksanaan</th>
+											</tr>
+											<tbody>
+												<?php $no=1; foreach($riwayat as $r){ ?>
+													<tr base>
+														<td><?= $no; ?></td>
+														<td><?= indo_date($r['tgl_berobat']); ?></td>
+														<td><?= $r['keluhan_pasien']; ?></td>
+														<td><?= $r['hasil_diagnosa']; ?></td>
+														<td><?= $r['penatalaksanaan']; ?></td>
+													</tr>
+
+													<?php $no++; } ?>
+												</tbody>
+											</thead>
+										</table>
+
+										<div id="tableshow">
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="box box-warning box-solid with-border">
+								<div class="box-header">
+									<h3 class="box-title">
+										<i class="fa fa-heartbeat"></i> 
+										Catatan Rekam Medis
+									</h3>
+									<div class="box-tools pull-right">
+										<a href="<?= base_url($this->uri->segment(1,0).$this->uri->slash_segment(2,'both'))?>today" class="btn btn-danger btn-sm float-right">
+											<!-- <i class="fa fa-print"></i>  -->Kembali</a>
+											<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+										</div>
+									</div>
+									<div class="box-body">
+										<div class="pesan" style="display: none;" ></div>
+										<!-- <div class="col-md-12">
+											<div class="row">
+												<div class="col-md-8"> -->
+													<form class="formrm" action="<?= base_url($this->uri->segment(1,0).$this->uri->slash_segment(2,'both'))?>update_rm">
+														<input type="hidden" id="no_transaksi" name="no_transaksi" value="<?= $d['no_transaksi'];?>">
+														<Label>Pemeriksaan Fisik</Label>
+														<div class="form-group form-inline">
+															<div class="form-group">
+																<label for="">Kesadaran</label>
+																<select name="kesadaran" class="form-control">
+																	<option value="<?= $d['kesadaran']?>" selected><?= $d['kesadaran']?></option>
+																	<option value=""> - Pilih -</option>
+																	<option>Compos Mentis</option>
+																	<option>Apatis</option>
+																	<option>Somnolen</option>
+																	<option>Delirium</option>
+																	<option>Sopor</option>
+																	<option>Soporo Comatous</option>
+																	<option>Coma</option>
+																</select>
+															</div>
+															<div class="form-group">
+																<label for="">Tinggi Badan</label>
+																<div class="input-group">
+																	<input type="text" name="tinggi_badan" class="form-control" id="tinggi_badan" size="4" value="<?= $d['tb']?>">
+																	<div class="input-group-addon">cm</div>
+																</div>
+															</div>
+															<div class="form-group">
+																<label for="">Berat Badan</label>
+																<div class="input-group">
+																	<input type="text" class="form-control" name="berat_badan" id="berat_badan" value="<?= $d['bb']?>" size="4">
+																	<div class="input-group-addon">kg</div>
+																</div>
+															</div>
+														</div>
+														<hr>
+														<Label>Tanda-Tanda Vital</Label>
+														<div class="form-group form-inline">
+															<div class="form-group">
+																<label for="">Sistole</label>
+																<div class="input-group">
+																	<input type="text" class="form-control" name="sistole" id="sistole" value="<?= $d['sistole']?>" size="4">
+																	<div class="input-group-addon">mmHg</div>
+																</div>
+															</div>
+															<div class="form-group">
+																<label for="">Diastole</label>
+																<div class="input-group">
+																	<input type="text" class="form-control" name="diastole" id="diastole" value="<?= $d['diastole']?>" size="4">
+																	<div class="input-group-addon">mmHg</div>
+																</div>
+															</div>
+															<div class="form-group">
+																<label for="">SpO2</label>
+																<div class="input-group">
+																	<input type="text" class="form-control" name="spo2" id="spo2" value="<?= $d['spo2']?>" size="4">
+																	<div class="input-group-addon">%</div>
+																</div>
+															</div>
+															<div class="form-group">
+																<label for="">Respiratory Rate</label>
+																<div class="input-group">
+																	<input type="text" class="form-control" name="rr" id="rr" value="<?= $d['rr']?>" size="4">
+																	<div class="input-group-addon">per minute</div>
+																</div>
+															</div>
+															<div class="form-group">
+																<label for="">Heart Rate</label>
+																<div class="input-group">
+																	<input type="text" class="form-control" name="hr" id="hr" value="<?= $d['hr']?>" size="4">
+																	<div class="input-group-addon">bpm</div>
+																</div>
+															</div>
+														</div>
+														<hr>
+														<div class="form-horizontal">
+															<div class="form-group form-inline">
+																<label class="control-label col-xs-2"  for="">Anamnesa</label>
+																<div class="col-xs-10">
+																	<textarea name="keluhan" class="form-control" cols="100" rows="2" required><?= $d['keluhan_pasien']?></textarea>
+																</div>
+															</div>
+															<div class="form-group form-inline">
+																<label class="control-label col-xs-2" for="">Diagnosa</label>
+																<div class="col-xs-10">
+																	<textarea name="diagnosa"class="form-control" cols="100" rows="2" required><?= $d['hasil_diagnosa']?></textarea>
+																</div>
+															</div>
+															<div class="form-group form-inline">
+																<label class="control-label col-xs-2" for="">Tindak Lanjut</label>
+																<div class="col-xs-10">
+																	<select name="penatalaksanaan" id="" class="form-control" required>
+																		<option value="<?= $d['penatalaksanaan']?>" selected><?= $d['penatalaksanaan']?></option>
+																		<option value="Rawat Jalan">Rawat Jalan</option>
+																		<option value="Rawat Inap">Rawat Inap</option>
+																		<option value="Rujuk">Rujuk</option>
+																		<option value="Lainnya">Lainnya</option>
+																	</select>
+																</div>
+															</div>
+														</div>
+														<div class="form-group">
+															<button type="submit" id="p" value="<?= $d['no_transaksi'];?>" class="btn btn-primary tombolsimpan">Update Data</button>
+														</div>
+													</form>
+												</div>
