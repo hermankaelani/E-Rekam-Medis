@@ -1,0 +1,28 @@
+<script>
+	$(document).ready(function() {
+		$('#table1').DataTable()
+	});
+</script>
+<table class="table table-bordered table-condensed table-striped datatable">
+	<thead>
+		<tr>
+			<th>No.</th>
+			<th>Tgl. Berobat</th>
+			<th>Keluhan</th>
+			<th>Diagnosa</th>
+			<th>Penatalaksanaan</th>
+		</tr>
+		<tbody>
+			<?php $no=1; foreach($riwayat as $r){ ?>
+				<tr>
+					<td><?= $no; ?></td>
+					<td><?= indo_date($r['tgl_berobat']); ?></td>
+					<td><?= $r['keluhan_pasien']; ?></td>
+					<td><?= $r['hasil_diagnosa']; ?></td>
+					<td><?= $r['penatalaksanaan']; ?></td>
+				</tr>
+
+				<?php $no++; } ?>
+			</tbody>
+		</thead>
+	</table>
